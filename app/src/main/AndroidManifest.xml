@@ -3,6 +3,7 @@
     package="es.elb4t.i2c">
 
     <uses-permission android:name="com.google.android.things.permission.USE_PERIPHERAL_IO" />
+    <uses-permission android:name="com.google.android.things.permission.MANAGE_INPUT_DRIVERS"/>
     <application>
         <uses-library android:name="com.google.android.things" />
 

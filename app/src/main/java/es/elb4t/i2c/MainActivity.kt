@@ -3,11 +3,10 @@ package es.elb4t.i2c
 import android.app.Activity
 import android.content.ContentValues.TAG
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
 import com.google.android.things.pio.I2cDevice
-import com.google.android.things.pio.PeripheralManager
-import java.io.IOException
-import kotlin.experimental.and
+import nz.geek.android.things.drivers.adc.I2cAdc
 
 
 /**
@@ -41,12 +40,22 @@ class MainActivity : Activity() {
     private val IN_I2C_DIRECCION = 0x48 // Dirección de entrada
     private var i2c: I2cDevice? = null
 
+    private val runnable: Runnable = UpdateRunner()
+    companion object {
+        private var adc: I2cAdc? = null
+        private val handler: Handler = Handler()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val manager = PeripheralManager.getInstance()
+        val builder = I2cAdc.builder()
+        adc = builder.address(0).fourSingleEnded().withConversionRate(100).build()
+        adc?.startConversions()
+        handler.post(runnable)
+
+        /*val manager = PeripheralManager.getInstance()
         val listaDispositivos = manager.i2cBusList
 
 
@@ -70,7 +79,19 @@ class MainActivity : Activity() {
             i2c = null  // liberamos memoria
         } catch (e: IOException) {
             Log.e(TAG, "Error en al acceder a dispositivo I2C", e)
-        }
+        }*/
 
+    }
+
+    class UpdateRunner: Runnable{
+
+        override fun run() {
+            var s = ""
+            for (i in 0..3) {
+                s += " canal " + i + ": " + adc?.readChannel(i)
+            }
+            Log.d(TAG, s)
+            handler.postDelayed(this, 1000)
+        }
     }
 }
